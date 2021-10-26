@@ -40,6 +40,7 @@ DEFAULT LED COLORS
 -------------------
 Green [solid]: system loaded and script starting
 Purple [solid]: Wi-Fi not configured
+Purple [blink]: Wi-Fi configured but not connected
 Yellow [blink]: entering the configuration mode
 Yellow [solid]: configuration mode
 White [solid]: connected to the Wi-Fi
@@ -216,8 +217,8 @@ def check_wpa_supplicant():
     try:
         p1 = subprocess.Popen(["ps", "ax"], stdout=subprocess.PIPE)
         p2 = subprocess.Popen(["grep", "wpa_supplicant"],
-                              stdin=p1.stdout, stdout=subprocess.PIPE)
-        p3 = subprocess.Popen(["grep", "wlan0"], stdin=p2.stdout)
+                                stdin=p1.stdout, stdout=subprocess.PIPE)
+        p3 = subprocess.Popen(["grep", "wlan0"], stdin=p2.stdout, stdout=subprocess.DEVNULL)
         p3.communicate()
         return p3.returncode
     except:
@@ -227,7 +228,7 @@ def check_wpa_supplicant():
 
 def start_wpa_supplicant():
     try:
-        result = subprocess.run("wpa_supplicant -B -c/etc/wpa_supplicant.conf -iwlan0 -Dnl80211,wext",
+        result = subprocess.run("wpa_supplicant -B -c{0} -iwlan0 -Dnl80211,wext".format(wpa_supplicant_conf),
                                 shell=True, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return result.returncode
     except:
